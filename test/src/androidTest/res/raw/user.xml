@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>name</key>
+        <string>danik</string>
+
+        <key>age</key>
+        <integer>42</integer>
+
+        <key>salary</key>
+        <integer>9999</integer>
+
+        <key>handsome</key>
+        <true />
+
+        <key>weight</key>
+        <real>74.5</real>
+
+        <key>key</key>
+        <data>absd</data>
+        
+        <key>unused_key</key>
+        <string>nothing</string>
+
+        <key>birthday</key>
+        <date>1960-10-10T10:10:10</date>
+
+        <key>devices</key>
+        <array>
+            <string>htc desire</string>
+            <string>nexus 7</string>
+            <string/>
+        </array>
+
+        <key>favoriteNumbers</key>
+        <array>
+            <integer>118</integer>
+            <integer>551</integer>
+            <integer>42</integer>
+        </array>
+
+        <key>sister</key>
+        <dict>
+            <key>name</key>
+            <string>anna</string>
+
+            <key>age</key>
+            <integer>26</integer>
+
+            <key>salary</key>
+            <integer>45632</integer>
+
+            <key>handsome</key>
+            <true />
+
+        </dict>
+
+        <key>parents</key>
+        <array>
+            <dict>
+                <key>name</key>
+                <string>vova</string>
+            </dict>
+            <dict>
+                <key>name</key>
+                <string>tania</string>
+            </dict>
+        </array>
+        
+        <key>unused_key2</key>
+        <string>nothing</string>
+        
+    </dict>
+</plist>

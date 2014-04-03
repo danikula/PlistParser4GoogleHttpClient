@@ -1,0 +1,23 @@
+apply plugin: 'android'
+
+android {
+    compileSdkVersion 8
+    buildToolsVersion '19.0.3'
+
+    defaultConfig {
+        minSdkVersion 8
+        targetSdkVersion 19
+
+        versionCode = 1
+        versionName = '0.1'
+
+        packageName "com.danikula.plistparser"
+        testPackageName "com.danikula.plistparser.test"
+        testInstrumentationRunner "android.test.InstrumentationTestRunner"
+    }
+
+    dependencies {
+        compile project(':library')
+        compile 'com.google.http-client:google-http-client:1.17.0-rc'
+    }
+}
