@@ -23,8 +23,6 @@ import android.util.Xml;
 
 /* package-private */class PlistXmlToObjectMapper {
 
-    private static final String LOG_TAG = PlistXmlToObjectMapper.class.getName();
-
     private SimpleDateFormat ISO_8601_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     private XmlHelper xmlHelper = new XmlHelper();
