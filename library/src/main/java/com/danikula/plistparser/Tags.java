@@ -6,18 +6,16 @@ import org.xmlpull.v1.XmlPullParserException;
 /* package-private */class Tags {
 
     static final String PLIST = "plist";
-
-    static final String KEY = "key";
-
-    static final String ARRAY = "array";
-    static final String DICT = "dict";
-    static final String STRING = "string";
-    static final String INTEGER = "integer";
-    static final String REAL = "real";
-    static final String DATA = "data";
-    static final String DATE = "date";
-    static final String TRUE = "true";
-    static final String FALSE = "false";
+    private static final String KEY = "key";
+    private static final String ARRAY = "array";
+    private static final String DICT = "dict";
+    private static final String STRING = "string";
+    private static final String INTEGER = "integer";
+    private static final String REAL = "real";
+    private static final String DATA = "data";
+    private static final String DATE = "date";
+    private static final String TRUE = "true";
+    private static final String FALSE = "false";
 
     static boolean isDictionary(String tag) {
         return DICT.equalsIgnoreCase(tag);

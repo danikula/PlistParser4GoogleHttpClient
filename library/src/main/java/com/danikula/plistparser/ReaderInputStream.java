@@ -41,16 +41,24 @@ package com.danikula.plistparser;
  * made subject to such option by the copyright holder.
  */
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.Reader;
 
 /**
- * This class convert Reader to InputStream. It works by converting the characters to the encoding specified in constructor
+ * This class convert Reader to InputStream. It works by converting the characters to the encoding specified in
+ * constructor
  * parameter.
- * 
+ *
  * @author Petr Hamernik, David Strupl
  */
 /* package-private */ class ReaderInputStream extends InputStream {
-    /** Input Reader class. */
+    /**
+     * Input Reader class.
+     */
     private Reader reader;
     private PipedOutputStream pos;
     private PipedInputStream pis;
@@ -58,7 +66,7 @@ import java.io.*;
 
     /**
      * Creates new input stream from the given reader. Uses the platform default encoding.
-     * 
+     *
      * @param reader Input reader
      */
     public ReaderInputStream(Reader reader) throws IOException {
@@ -70,7 +78,7 @@ import java.io.*;
 
     /**
      * Creates new input stream from the given reader and encoding.
-     * 
+     *
      * @param reader Input reader
      * @param encoding
      */
@@ -81,69 +89,53 @@ import java.io.*;
         osw = new OutputStreamWriter(pos, encoding);
     }
 
+    @Override
     public int read() throws IOException {
         if (pis.available() > 0) {
             return pis.read();
         }
-
         int c = reader.read();
-
         if (c == -1) {
             return c;
         }
-
         osw.write(c);
         osw.flush();
         pos.flush();
-
         return pis.read();
     }
 
+    @Override
     public int read(byte[] b, int off, int len) throws IOException {
         if (len == 0) {
             return 0;
         }
-
         int c = read();
-
         if (c == -1) {
             return -1;
         }
-
         b[off] = (byte) c;
-
         int i = 1;
-
         // Don't try to fill up the buffer if the reader is waiting.
         for (; (i < len) && reader.ready(); i++) {
             c = read();
-
             if (c == -1) {
                 return i;
             }
-
             b[off + i] = (byte) c;
         }
-
         return i;
     }
 
+    @Override
     public int available() throws IOException {
         int i = pis.available();
-
         if (i > 0) {
             return i;
         }
-
-        if (reader.ready()) {
-            // Char must produce at least one byte.
-            return 1;
-        }
-        else {
-            return 0;
-        }
+        return reader.ready() ? 1 : 0; // Char must produce at least one byte.
     }
 
+    @Override
     public void close() throws IOException {
         reader.close();
         osw.close();

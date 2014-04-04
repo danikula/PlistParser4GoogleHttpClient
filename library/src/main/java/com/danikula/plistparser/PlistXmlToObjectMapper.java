@@ -27,7 +27,7 @@ import android.util.Xml;
 
     private XmlHelper xmlHelper = new XmlHelper();
 
-    public Object convertPlistStreamToObject(InputStream inputStream, Type type) throws IOException, PlistParseException {
+    Object convertPlistStreamToObject(InputStream inputStream, Type type) throws IOException, PlistParseException {
         try {
             if (!(type instanceof Class)) {
                 throw new PlistParseException(String.format("%s is not instance of Class", type));
@@ -41,14 +41,13 @@ import android.util.Xml;
 
             Object result = convertXmlToObject(parser, resultClass);
             return result;
-        }
-        catch (XmlPullParserException e) {
+        } catch (XmlPullParserException e) {
             throw new PlistParseException("Error parsing plist resource", e);
         }
     }
 
     private Object convertXmlToObject(XmlPullParser parser, Class<?> resultClass) throws XmlPullParserException, IOException,
-        PlistParseException {
+            PlistParseException {
         parser.require(XmlPullParser.START_TAG, null, Tags.PLIST);
         int eventType = xmlHelper.nextTag(parser);
         if (Tags.isEndTag(eventType)) {
@@ -57,20 +56,16 @@ import android.util.Xml;
         String tag = parser.getName();
         if (Tags.isDictionary(tag)) {
             return parseDictionary(parser, resultClass);
-        }
-        else if (Tags.isArray(tag)) {
+        } else if (Tags.isArray(tag)) {
             return rootArrayToList(parser, resultClass);
-        }
-        else {
+        } else {
             throw new PlistParseException("Tag plist must contain only tag 'array' or 'dict', but not " + tag);
         }
     }
 
-    // специальная обработка для тех случаев, когда чайлдом плиста является массив.
-    // В этом случае нету возможности получить тип элементов листа.
-    // Потому лист необходимо завернуть в ListContainer, а тип элементов листа получаем из дженерик параметра супрекласса.
+    // there is no way to get type of elements of root array, so list must be wrapped by parameterized ListContainer
     private Object rootArrayToList(XmlPullParser parser, Class<?> listContainerClass) throws PlistParseException,
-        XmlPullParserException, IOException {
+            XmlPullParserException, IOException {
         Class<?> arrayEntryClass = getArrayEntryClass(listContainerClass);
         Object listContainer = Types.newInstance(listContainerClass);
         FieldInfo listFieldInfo = getListFieldFromListContainer(listContainerClass, arrayEntryClass);
@@ -103,7 +98,7 @@ import android.util.Xml;
     }
 
     private FieldInfo getListFieldFromListContainer(Class<?> listContainerClass, Class<?> arrayEntryClass)
-        throws PlistParseException {
+            throws PlistParseException {
         ClassInfo listContainerClassInfo = ClassInfo.of(listContainerClass);
         Collection<String> fieldNames = listContainerClassInfo.getNames();
         for (String fieldName : fieldNames) {
@@ -121,7 +116,7 @@ import android.util.Xml;
     }
 
     private Object parseDictionary(XmlPullParser parser, Class<?> resultClass) throws XmlPullParserException, IOException,
-        PlistParseException {
+            PlistParseException {
         Object resultObject = Types.newInstance(resultClass);
         ClassInfo resultObjectClassInfo = ClassInfo.of(resultClass);
         int dictionaryDepth = parser.getDepth();
@@ -139,8 +134,7 @@ import android.util.Xml;
                 if (isPropertyEndTag) {
                     xmlHelper.nextTag(parser);
                     continue;
-                }
-                else {// end dictionary tag
+                } else {// end dictionary tag
                     break;
                 }
             }
@@ -173,76 +167,62 @@ import android.util.Xml;
             checkFieldType(fieldInfo, value, int.class);
             int intValue = ((Integer) value).intValue();
             fieldInfo.setValue(resultObject, intValue);
-        }
-        else if (fieldClass == double.class) {
+        } else if (fieldClass == double.class) {
             checkFieldType(fieldInfo, value, double.class);
             double doubleValue = ((Double) value).doubleValue();
             fieldInfo.setValue(resultObject, doubleValue);
-        }
-        else if (fieldClass == boolean.class) {
+        } else if (fieldClass == boolean.class) {
             checkFieldType(fieldInfo, value, boolean.class);
             boolean booleanValue = ((Boolean) value).booleanValue();
             fieldInfo.setValue(resultObject, booleanValue);
-        }
-        else { // objects
+        } else { // objects
             checkFieldType(fieldInfo, value, value.getClass());
             fieldInfo.setValue(resultObject, value);
         }
     }
 
-    // если разбираемое значение - массив, то valueClass должен содержать тип элементов массива
     private Object parseValueTag(XmlPullParser parser, Class<?> valueClass) throws XmlPullParserException, IOException,
-        PlistParseException {
+            PlistParseException {
         String type = parser.getName();
         String valueAsString = null;
         try {
             if (Tags.isString(type)) {
                 return xmlHelper.getTextValueOfElement(parser);
-            }
-            else if (Tags.isInteger(type)) {
+            } else if (Tags.isInteger(type)) {
                 valueAsString = xmlHelper.getTextValueOfElement(parser);
                 return Integer.parseInt(valueAsString);
-            }
-            else if (Tags.isReal(type)) {
+            } else if (Tags.isReal(type)) {
                 valueAsString = xmlHelper.getTextValueOfElement(parser);
                 return TextUtils.isEmpty(valueAsString.trim()) ? Double.NaN : Double.parseDouble(valueAsString);
-            }
-            else if (Tags.isBoolean(type)) {
+            } else if (Tags.isBoolean(type)) {
                 boolean booleanValue = Tags.isTrueTag(parser.getName());
                 xmlHelper.nextTag(parser);
                 return booleanValue;
-            }
-            else if (Tags.isDate(type)) {
+            } else if (Tags.isDate(type)) {
                 valueAsString = xmlHelper.getTextValueOfElement(parser);
                 return ISO_8601_DATE_FORMATTER.parse(valueAsString);
-            }
-            else if (Tags.isData(type)) {
+            } else if (Tags.isData(type)) {
                 valueAsString = xmlHelper.getTextValueOfElement(parser);
                 byte[] bytes = valueAsString.getBytes();
                 return Base64.encode(bytes, Base64.DEFAULT);
-            }
-            else if (Tags.isArray(type)) {
-                // если разбираемое значение - массив, то valueClass должен содержать тип элементов массива
+            } else if (Tags.isArray(type)) {
+                // in this case valueClass must contain type of elements
                 return parseArray(parser, valueClass);
-            }
-            else if (Tags.isDictionary(type)) {
+            } else if (Tags.isDictionary(type)) {
                 return parseDictionary(parser, valueClass);
-            }
-            else {
+            } else {
                 String error = String.format("Unexpected type '%s'. Only plist types are permitted!", type);
                 throw new PlistParseException(error);
             }
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new PlistParseException(String.format("Error formatting value '%s' to number!", valueAsString));
-        }
-        catch (ParseException e) {
+        } catch (ParseException e) {
             throw new PlistParseException(String.format("Error formatting value '%s' to date!", valueAsString));
         }
     }
 
     private List<?> parseArray(XmlPullParser parser, Class<?> expectedEntryClass) throws XmlPullParserException, IOException,
-        PlistParseException {
+            PlistParseException {
         int arrayDepth = parser.getDepth();
         xmlHelper.nextTag(parser);
         List resultList = Lists.newArrayList();
@@ -272,5 +252,4 @@ import android.util.Xml;
             throw new PlistParseException(errorMessage);
         }
     }
-
 }
